@@ -1,5 +1,4 @@
 .header {
-
 	margin-bottom: 13px;
 }
 
@@ -7,7 +6,6 @@
 	display: flex;
 	justify-content: space-between;
 	padding: 14px 12px 12px 6px;
-
 }
 
 .header__nav {
@@ -31,10 +29,10 @@
 	&::before {
 		content: "";
 		position: absolute;
+		left: -15px;
 		width: 8px;
 		height: 11px;
-		left: -15px;
-		background-image: url(../images/address.svg);
+		background-image: url("../images/address.svg");
 	}
 
 	&::after {
@@ -44,22 +42,22 @@
 		width: 0;
 		height: 0;
 		margin-left: 8px;
-		border-left: 2px solid transparent;
+		border-top: 3px solid #000000;
 		border-right: 2px solid transparent;
-		border-top: 3px solid black;
+		border-left: 2px solid transparent;
 	}
 }
 
 .header__bot {
-	border-top: 1px solid #EAEAEA;
-	border-bottom: 1px solid #EAEAEA;
 	padding: 14px 0;
+	border-top: 1px solid #eaeaea;
+	border-bottom: 1px solid #eaeaea;
 }
 
 .header__media {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
+	align-items: center;
 }
 
 .header__media-social {
@@ -69,11 +67,10 @@
 	padding-top: 5px;
 }
 
-
 .header__media-number {
 	position: relative;
-	font-weight: 500;
 	padding-right: 9px;
+	font-weight: 500;
 	font-size: 12px;
 	line-height: 107.69%;
 
@@ -84,9 +81,9 @@
 		width: 0;
 		height: 0;
 		margin-left: 6px;
-		border-left: 2px solid transparent;
+		border-top: 3px solid #000000;
 		border-right: 2px solid transparent;
-		border-top: 3px solid black;
+		border-left: 2px solid transparent;
 	}
 }
 
@@ -105,8 +102,7 @@
 		position: absolute;
 		width: 12px;
 		height: 12px;
-		background-image: url(../images/lupa.svg) center center;
-
+		background-image: url("../images/lupa.svg") center center;
 	}
 }
 
@@ -124,10 +120,10 @@
 	font-weight: 700;
 	font-size: 11px;
 	line-height: 133.19%;
-	background: #FA2744;
-	border: none;
-	color: #ffffff;
 	text-align: left;
+	color: #ffffff;
+	background: #fa2744;
+	border: none;
 
 	&::before {
 		content: "";
@@ -136,9 +132,9 @@
 		right: 13px;
 		width: 12px;
 		height: 2px;
-		background-color: white;
+		background-color: #ffffff;
 		border-radius: 1px;
-		box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+		box-shadow: 0 4px 0 0 #ffffff, 0 8px 0 0 #ffffff;
 	}
 }
 
