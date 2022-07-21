@@ -1,13 +1,9 @@
-import { API_URL } from './api/common/const.js';
 import autoprefixer from 'autoprefixer';
 import bemValidator from 'gulp-html-bem-validator';
 import cssnano from 'cssnano';
 import del from 'del';
 import eslint from 'gulp-eslint';
-import fetch from 'node-fetch';
-import { getPageData } from './api/common/util.js';
 import gulp from 'gulp';
-import gulpData from 'gulp-data';
 import gulpIf from 'gulp-if';
 import imagemin from 'gulp-imagemin';
 import less from 'gulp-less';
@@ -15,7 +11,6 @@ import lessSyntax from 'postcss-less';
 import lintspaces from 'gulp-lintspaces';
 import mozjpeg from 'imagemin-mozjpeg';
 import mqpacker from 'postcss-sort-media-queries';
-import nodemon from 'gulp-nodemon';
 import pngquant from 'imagemin-pngquant';
 import postcss from 'gulp-postcss';
 import postcssBemLinter from 'postcss-bem-linter';
@@ -27,7 +22,6 @@ import stackSprite from 'gulp-svg-sprite';
 import stylelint from 'stylelint';
 import svgo from 'imagemin-svgo';
 import svgoConfig from './svgo.config.js';
-import twig from 'gulp-twig';
 import vinylNamed from 'vinyl-named';
 import webp from 'gulp-webp';
 import webpack from 'webpack';
@@ -35,20 +29,16 @@ import webpackConfig from './webpack.config.js';
 import webpackStream from 'webpack-stream';
 
 const IS_DEV = process.env.NODE_ENV === 'development';
-let store = {};
 
 const Entry = {
 	ICONS: 'source/icons/**/*.svg',
 	IMAGES: 'source/images/**/*.{jpg,png,svg}',
-	PAGES: ['source/pages/**/*.twig', '!source/pages/**/_*.twig'],
+	PAGES: 'source/pages/**/*.html',
 	SCRIPTS: ['source/scripts/**/*.js', '!source/scripts/**/_*.js'],
 	STATIC: ['source/static/**/*', '!source/static/**/*.md'],
 	STYLES: ['source/styles/**/*.less', '!source/styles/**/_*.less']
 };
 const Watch = {
-	API: 'api/restart.log',
-	ENGINE: ['api/**/*.js', '*.{js,cjs}'],
-	PAGES: 'source/pages/**/*.twig',
 	SCRIPTS: 'source/scripts/**/*.js',
 	STYLES: 'source/styles/**/*.less'
 };
@@ -73,38 +63,6 @@ const optimizeImages = () => imagemin([
 ]);
 
 export const buildLayouts = () => src(Entry.PAGES)
-	.pipe(gulpData(async (file) => {
-		const page = file.path.replace(/^.*pages(\\+|\/+)(.*)\.twig$/, '$2')
-			.replace(/\\/g, '/');
-
-		const data = await (IS_DEV ? fetch(`${API_URL}/${page}`).then((res) => res.json()) : getPageData(page));
-
-		store = { ...data, IS_DEV };
-		return store;
-	}))
-	.pipe(twig({
-		filters: [
-			{
-				func(str, args) {
-					const [sign = '.'] = args || [];
-
-					if ((/(\.|\?|!|,|:|…)$/).test(str)) {
-						return str;
-					}
-					return `${str}${sign}`;
-				},
-				name: 'punctify'
-			}
-		],
-		functions: [
-			{
-				func(key) {
-					return store.Term[key];
-				},
-				name: 'Term'
-			}
-		]
-	}))
 	.pipe(posthtml())
 	.pipe(bemValidator())
 	.pipe(gulpIf(process.env.NODE_ENV !== 'test', dest(Destination.ROOT)));
@@ -146,7 +104,7 @@ export const copyImages = () => src(Entry.IMAGES)
 export const copyStatic = () => src(Entry.STATIC)
 	.pipe(dest(Destination.ROOT));
 
-export const lintLayouts = () => src([Watch.PAGES, Entry.ICONS])
+export const lintLayouts = () => src([Entry.PAGES, Entry.ICONS])
 	.pipe(checkLintspaces())
 	.pipe(reportLintspaces());
 
@@ -159,7 +117,7 @@ export const lintStyles = () => src(Watch.STYLES)
 		postcssReporter({ clearAllMessages: true, throwError: !IS_DEV })
 	], { syntax: lessSyntax }));
 
-export const lintScripts = () => src([...Watch.ENGINE, Watch.SCRIPTS])
+export const lintScripts = () => src(Watch.SCRIPTS)
 	.pipe(checkLintspaces())
 	.pipe(reportLintspaces())
 	.pipe(eslint({ fix: false }))
@@ -184,24 +142,16 @@ export const startServer = (done) => {
 	watch(Entry.ICONS, series(buildSprite, reload));
 	watch(Entry.IMAGES, series(copyImages, reload));
 	watch(Entry.STATIC, series(copyStatic, reload));
-	watch(Watch.API, series(buildLayouts, reload));
-	watch(Watch.ENGINE, lintScripts);
-	watch(Watch.PAGES, series(lintLayouts, buildLayouts, reload));
+	watch(Entry.PAGES, series(lintLayouts, buildLayouts, reload));
 	watch(Watch.SCRIPTS, series(lintScripts, buildScripts, reload));
 	watch(Watch.STYLES, series(lintStyles, buildStyles, reload));
 
 	done();
 };
 
-export const startApi = (done) => nodemon({
-	ext: 'js json',
-	script: './api',
-	watch: ['api']
-}).on('start', done);
-
 export const lint = parallel(lintLayouts, lintStyles, lintScripts);
 export const test = series(lint, buildLayouts);
 export const compile = parallel(buildLayouts, buildStyles, buildScripts, buildSprite, copyImages, copyStatic);
 export const build = series(parallel(lint, cleanDestination), compile);
-export const dev = series(startApi, build, startServer);
+export const dev = series(build, startServer);
 export default dev;

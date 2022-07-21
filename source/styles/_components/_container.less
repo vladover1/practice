@@ -1,13 +1,17 @@
-.container{
-	margin: 0 auto;
-	padding: 0 5px;
-
-	@media @mobile{
-		max-width: 395px;
-	}
+.container {
+	max-width: 924px;
+	margin-right: auto;
+	margin-left: auto;
+	padding-right: 15px;
+	padding-left: 15px;
 
 	@media @tablet {
-		max-width: 929px;
-		padding: 0 15px;
+		max-width: none;
+		padding-right: 50px;
+		padding-left: 50px;
+	}
+
+	@media @desktop {
+		width: 1260px;
 	}
 }
